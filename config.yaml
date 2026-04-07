@@ -61,6 +61,10 @@ crawler:
   user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
   # 重试次数
   max_retries: 3
+  # 浏览器超时（秒），用于 Playwright 渲染页面
+  browser_timeout: 20
+  # 需要使用浏览器渲染的域名（可选，默认已内置常见JS渲染站点）
+  browser_domains: []
   # 需要剔除的广告关键词（URL 或 CSS 选择器中包含这些词的元素会被移除）
   ad_keywords:
     - "ad-"
