@@ -1,21 +1,26 @@
 # ============================================================
 # 输入/输出配置文件
 # 说明：将数据源和输出目标分离配置，
-#       后续可方便地将 excel 切换为 mysql 等其他数据源
+#       后续可方便地将 excel/csv 切换为 mysql 等其他数据源
 # ============================================================
 
 # ---- 数据源配置（输入） ----
 input:
-  # 数据源类型：excel / mysql
-  type: excel
+  # 数据源类型：excel / csv / mysql
+  type: csv
+
+  # CSV 配置（当 input.type == csv 时生效）
+  csv:
+    file_path: "findings.csv"
+    encoding: "gb18030"
+    flag_filter_value: 0
+    fields: ["id", "url", "flag", "content_all"]
 
   # Excel 配置（当 input.type == excel 时生效）
   excel:
     file_path: "DeepResearch.xlsx"
-    sheet_name: 0          # 工作表名或索引，0 表示第一个
-    # 查询条件：flag 字段等于该值的行将被处理
+    sheet_name: 0
     flag_filter_value: 0
-    # 需要读取的字段
     fields: ["id", "url", "flag", "content_all"]
 
   # MySQL 配置（当 input.type == mysql 时生效，后续切换使用）
@@ -26,18 +31,21 @@ input:
     password: "your_password"
     database: "deep_research"
     table: "articles"
-    # 查询 SQL（应返回 id, url 等字段）
     query: "SELECT id, url FROM articles WHERE flag = 0"
 
 # ---- 输出配置 ----
 output:
-  # 输出类型：excel / mysql
-  type: excel
+  # 输出类型：excel / csv / mysql
+  type: csv
+
+  # CSV 输出配置（当 output.type == csv 时生效）
+  csv:
+    file_path: "findings_output.csv"
+    encoding: "gb18030"
 
   # Excel 输出配置（当 output.type == excel 时生效）
   excel:
     file_path: "DeepResearch_output.xlsx"
-    # 更新逻辑：将 content_all 和 flag 写回原表
     update_fields: ["content_all", "flag"]
 
   # MySQL 输出配置（当 output.type == mysql 时生效，后续切换使用）
@@ -48,24 +56,16 @@ output:
     password: "your_password"
     database: "deep_research"
     table: "articles"
-    # 更新 SQL 模板，:id / :content_all / :flag 为参数占位符
     update_sql: "UPDATE articles SET content_all = :content_all, flag = :flag WHERE id = :id"
 
 # ---- 抓取配置 ----
 crawler:
-  # 请求超时（秒）
   timeout: 15
-  # 请求间隔（秒），避免被封
   delay: 1
-  # User-Agent
   user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-  # 重试次数
   max_retries: 3
-  # 浏览器超时（秒），用于 Playwright 渲染页面
   browser_timeout: 20
-  # 需要使用浏览器渲染的域名（可选，默认已内置常见JS渲染站点）
   browser_domains: []
-  # 需要剔除的广告关键词（URL 或 CSS 选择器中包含这些词的元素会被移除）
   ad_keywords:
     - "ad-"
     - "advertisement"

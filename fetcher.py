@@ -82,6 +82,13 @@ class ContentFetcher:
 
     def fetch_content(self, url: str) -> str:
         """抓取单个 URL 的正文内容（纯文本，已去广告）"""
+        try:
+            return self._fetch_content_impl(url)
+        except Exception as e:
+            logger.error(f"抓取异常: {url} - {e}")
+            return ""
+
+    def _fetch_content_impl(self, url: str) -> str:
         use_browser = self._needs_browser(url)
 
         if use_browser:
@@ -212,10 +219,15 @@ class ContentFetcher:
 
     def _extract_text(self, html: str) -> str:
         """使用 readability 提取正文，再用 BeautifulSoup 清洗广告"""
-        doc = Document(html)
-        summary_html = doc.summary()
-
-        soup = BeautifulSoup(summary_html, "lxml")
+        try:
+            doc = Document(html)
+            summary_html = doc.summary()
+        except Exception:
+            return ""
+        try:
+            soup = BeautifulSoup(summary_html, "lxml")
+        except Exception:
+            return ""
         self._remove_ads(soup)
 
         for tag in soup(["script", "style", "noscript", "iframe", "svg"]):
@@ -229,7 +241,13 @@ class ContentFetcher:
 
     def _fallback_extract(self, html: str, url: str) -> str:
         """备用提取方案：从 HTML 源码中用 BeautifulSoup 提取正文"""
-        soup = BeautifulSoup(html, "lxml")
+        try:
+            soup = BeautifulSoup(html, "lxml")
+        except Exception:
+            try:
+                soup = BeautifulSoup(html, "html.parser")
+            except Exception:
+                return ""
 
         for tag in soup(["script", "style", "noscript", "iframe", "svg", "header", "nav"]):
             tag.decompose()
