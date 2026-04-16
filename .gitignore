@@ -12,3 +12,10 @@ config_local.yaml
 .idea/
 .vscode/
 *.log
+
+# 数据文件（不纳入版本控制）
+*.csv
+!sample_data.csv
+findings_output.csv
+findings.csv
+DeepResearch_output.xlsx
